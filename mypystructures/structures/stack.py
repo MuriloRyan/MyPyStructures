@@ -3,7 +3,7 @@
 from typing import Any
 
 class Node:
-    def __init__(self, value=None, next_node=None) -> None:
+    def __init__(self, value=None) -> None:
         self.value = value
         self.next = None
     
@@ -27,7 +27,7 @@ class Stack:
 
         #the first of all nodes
         self._first_node = self.Node_Class(value=first_value)
-        self._last_node = self.Node_Class(value=first_value)
+        self._last_node = self._first_node
 
         self._state = "__empty__" if first_value == None else "__not_empty__"
     
@@ -39,9 +39,6 @@ class Stack:
                 return None
         except:
             return None
-    
-    def peak(self) -> Node:
-        return self._last_node
     
     def is_empty(self) -> bool:
         return True if self._state == "__empty__" else False
@@ -60,23 +57,18 @@ class Stack:
         #and we push it in the next of the first node (if is empty)
         if self._first_node.next is None:
             self._first_node.next = new_node
+            self._last_node = self._first_node.next
+            self._state = "__not_empty__"
+            return value
         
-        #else, we run thought all nodes and push it in the last one
-        else:
-            current_node = self._first_node.next
-
-            while current_node.next is not None:
-                current_node = current_node.next
-            current_node.next = new_node
-
-        self._last_node = self.Node_Class(value=value)
+        self._last_node.next = new_node
+        self._last_node = self._last_node.next
         self._state = "__not_empty__"
         return value
 
     def pop(self) -> str:
         #if the first node is empty
-        if self._first_node is None:
-            self._state = "__empty__"
+        if self.is_empty():
             return None
 
         #if the second is empty
@@ -98,16 +90,22 @@ class Stack:
 
         value = current_node.value
         prev_node.next = None
-        self._last_node = self.Node_Class(value=prev_node.value)
+        self._last_node = prev_node
         self._state = "__not_empty__"
         return value
+    
+    def peak(self):
+        if self.is_empty():
+            return None
+        return self._last_node
 
     def __len__(self) -> int:
+        if self.is_empty():
+            return 0
         first_is_valid = self._validate_node(self._first_node)
 
-        i = 1 if first_is_valid and self._state == "__not_empty__" else 0
-
-        current_node = self._first_node.next if first_is_valid else None
+        i = 1   
+        current_node = self._first_node.next
 
         #while the next value is not None, we add "," and the value of the Node
         while current_node:
@@ -146,6 +144,9 @@ class Stack:
         return str(final_list) + ")"
     
     def __getitem__(self, item) -> Node:
+        if self.is_empty():
+            raise IndexError
+
         #raise a exception if item (arg of stack[i]) is not int
         if not isinstance(item, int):
             raise
@@ -176,3 +177,7 @@ class Stack:
         
         except:
             raise StopIteration
+
+stack = Stack()
+
+stack.push(1)
